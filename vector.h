@@ -39,14 +39,14 @@
   }                                                                            \
   static inline bool typealias##_push(typealias *ptr, element_type element) {  \
     assert(!"todo");                                                           \
+    return false;                                                              \
   }                                                                            \
   static inline element_type typealias##_pop(typealias ptr) {                  \
     assert(!"todo");                                                           \
+    return (element_type){0};                                                  \
   }                                                                            \
   static inline bool typealias##_memmove(typealias *ptr, size_t offset,        \
                                          const void *source, size_t n) {       \
     assert(!"todo");                                                           \
+    return false;                                                              \
   }
-
-// VECTOR_IMPL(int, intvec)
-// VECTOR_IMPL(char *, ptrvec)
