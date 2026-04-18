@@ -58,6 +58,12 @@ void rawvec_free(rawvec ptr);
 // Returns true if the vector was moved during resizing.
 bool rawvec_resize(rawvec *ptr, size_t capacity);
 
+// Reserve capacity for at least `additional` more elements to be inserted.
+//
+// The implementation may allocate more than this, but after this call it is
+// guaranteed that the capacity is at least `rawvec_len(*ptr) + additional`.
+bool rawvec_reserve(rawvec *ptr, size_t additional);
+
 // Set the number of initialized elements to `len`.
 //
 // Undefined if `len` exceeds the capacity. This will not initialize any

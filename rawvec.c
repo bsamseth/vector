@@ -34,6 +34,25 @@ bool rawvec_resize(rawvec *ptr, size_t capacity) {
   return changed;
 }
 
+bool rawvec_reserve(rawvec *ptr, size_t additional) {
+  __rawvec_t *vec = __rawvec_from_user_ptr(*ptr);
+
+  // First check if we already have enough room.
+  size_t required_capacity = vec->count + additional;
+  if (required_capacity <= vec->capacity)
+    return false;
+
+  // Otherwise, determine the next size to grow to.
+  // Growth strategy: Double capacity until enough room.
+  // If initial capacity is zero, start with the required capacity.
+  size_t new_capacity = vec->capacity ? vec->capacity : required_capacity;
+  while (new_capacity < required_capacity) {
+    new_capacity *= 2;
+  }
+
+  return rawvec_resize(ptr, new_capacity);
+}
+
 void rawvec_set_len(rawvec ptr, size_t len) {
   __rawvec_t *vec = __rawvec_from_user_ptr(ptr);
   assert(len <= vec->capacity);
@@ -41,23 +60,8 @@ void rawvec_set_len(rawvec ptr, size_t len) {
 }
 
 bool rawvec_push(rawvec *ptr, char byte) {
+  bool changed = rawvec_reserve(ptr, 1);
   __rawvec_t *vec = __rawvec_from_user_ptr(*ptr);
-  bool changed = false;
-  if (vec->count == vec->capacity) {
-    size_t new_capacity =
-        vec->capacity
-            ?
-            // The extra `sizeof(__rawvec_t)` ensures the total allocation size
-            // stays a power of two if it was so initially.
-            2 * vec->capacity + sizeof(__rawvec_t)
-            // If capacity was zero, set it so that the total allocation is a
-            // power of two.
-            : 64 - sizeof(__rawvec_t);
-    if (rawvec_resize(ptr, new_capacity)) {
-      vec = __rawvec_from_user_ptr(*ptr);
-      changed = true;
-    }
-  }
   (*ptr)[vec->count++] = byte;
   return changed;
 }
@@ -70,18 +74,9 @@ char rawvec_pop(rawvec ptr) {
 
 bool rawvec_memmove(rawvec *ptr, size_t offset, const void *source, size_t n) {
   __rawvec_t *vec = __rawvec_from_user_ptr(*ptr);
-  bool changed = false;
   assert(offset <= vec->count);
-  if (vec->capacity - offset < n) {
-    size_t new_capacity = vec->capacity ? vec->capacity : n;
-    while (new_capacity - offset < n) {
-      new_capacity *= 2;
-    }
-    if (rawvec_resize(ptr, new_capacity)) {
-      vec = __rawvec_from_user_ptr(*ptr);
-      changed = true;
-    }
-  }
+  size_t n_added = n - (vec->count - offset);
+  bool changed = rawvec_reserve(ptr, n_added);
 
   // If the allocation moved due to the resize, then it cannot overlap with
   // source, so it is safe to do memcpy in place of memmove.
@@ -90,11 +85,11 @@ bool rawvec_memmove(rawvec *ptr, size_t offset, const void *source, size_t n) {
   else
     memmove((*ptr) + offset, source, n);
 
-  vec->count += n - (vec->count - offset);
+  vec->count += n_added;
   return changed;
 }
 
-#ifdef VECTOR_TEST_MAIN
+#ifdef RAWVEC_TEST_MAIN
 #include <stdio.h>
 int main() {
   char *vec = rawvec_init(0);
