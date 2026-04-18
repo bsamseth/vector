@@ -8,40 +8,40 @@ VECTOR_IMPL(int, intvec)
 
 int main() {
   intvec vec = intvec_init(0);
-  assert(rawvec_is_empty(vec));
+  assert(intvec_is_empty(vec));
   int data[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  rawvec_memmove(&vec, 0, data, 10);
-  assert(!rawvec_is_empty(vec));
+  intvec_memmove(&vec, 0, data, 10);
+  assert(!intvec_is_empty(vec));
 
-  assert(rawvec_len(vec) == 10);
-  assert(rawvec_capacity(vec) == 10);
+  assert(intvec_len(vec) == 10);
+  assert(intvec_capacity(vec) == 10);
 
-  rawvec_push(&vec, 101);
+  intvec_push(&vec, 101);
 
-  assert(rawvec_len(vec) == 11);
-  assert(rawvec_capacity(vec) >= 11);
+  assert(intvec_len(vec) == 11);
+  assert(intvec_capacity(vec) >= 11);
   assert(vec[10] == 101);
 
-  rawvec_push(&vec, 102);
-  assert(rawvec_len(vec) == 12);
-  assert(rawvec_capacity(vec) >= 12);
+  intvec_push(&vec, 102);
+  assert(intvec_len(vec) == 12);
+  assert(intvec_capacity(vec) >= 12);
   assert(vec[11] == 102);
 
-  char b = rawvec_pop(vec);
-  assert(rawvec_len(vec) == 11);
+  char b = intvec_pop(vec);
+  assert(intvec_len(vec) == 11);
   assert(b == 102);
 
-  rawvec_memmove(&vec, 7, data, 10);
-  assert(rawvec_len(vec) == 17);
-  rawvec_push(&vec, 103);
+  intvec_memmove(&vec, 7, data, 10);
+  assert(intvec_len(vec) == 17);
+  intvec_push(&vec, 103);
 
-  for (size_t i = 0; i < rawvec_len(vec); ++i) {
+  for (size_t i = 0; i < intvec_len(vec); ++i) {
     printf("Entry %lu: %d\n", i, vec[i]);
   }
 
-  printf("Capacity: %lu\n", rawvec_capacity(vec));
+  printf("Capacity: %lu\n", intvec_capacity(vec));
 
-  rawvec_free(vec);
+  intvec_free(vec);
 
   return 0;
 }
