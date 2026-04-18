@@ -7,7 +7,7 @@ rawvec: rawvec.c rawvec.h
 	${CC} ${CFLAGS} -g -DRAWVEC_TEST_MAIN -o $@ $<
 
 testmain: testmain.c rawvec.c vector.h rawvec.h
-	${CC} ${CFLAGS} -g -DRAWVEC_TEST_MAIN -o $@ $^
+	${CC} ${CFLAGS} -g -o $@ $^
 
 
 clean:
