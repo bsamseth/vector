@@ -34,19 +34,26 @@
   static inline bool typealias##_resize(typealias *ptr, size_t capacity) {     \
     return rawvec_resize((rawvec *)ptr, capacity * sizeof(element_type));      \
   }                                                                            \
-  static inline bool typealias##_set_len(typealias ptr, size_t len) {          \
-    return rawvec_set_len((rawvec)ptr, len * sizeof(element_type));            \
+  static inline void typealias##_set_len(typealias ptr, size_t len) {          \
+    rawvec_set_len((rawvec)ptr, len * sizeof(element_type));                   \
   }                                                                            \
   static inline bool typealias##_push(typealias *ptr, element_type element) {  \
-    assert(!"todo");                                                           \
-    return false;                                                              \
+    char *element_as_bytes = (char *)&element;                                 \
+    int changed = 0;                                                           \
+    for (size_t i = 0; i < sizeof(element_type); ++i)                          \
+      changed += rawvec_push((rawvec *)ptr, element_as_bytes[i]);              \
+    return changed > 0;                                                        \
   }                                                                            \
   static inline element_type typealias##_pop(typealias ptr) {                  \
-    assert(!"todo");                                                           \
-    return (element_type){0};                                                  \
+    size_t length = typealias##_len(ptr);                                      \
+    assert(length > 0);                                                        \
+    element_type value = ptr[length - 1];                                      \
+    for (size_t i = 0; i < sizeof(element_type); ++i)                          \
+      rawvec_pop((rawvec)ptr);                                                 \
+    return value;                                                              \
   }                                                                            \
-  static inline bool typealias##_memmove(typealias *ptr, size_t offset,        \
-                                         const void *source, size_t n) {       \
-    assert(!"todo");                                                           \
-    return false;                                                              \
+  static inline bool typealias##_memmove(                                      \
+      typealias *ptr, size_t offset, const element_type *source, size_t n) {   \
+    return rawvec_memmove((rawvec *)ptr, offset * sizeof(element_type),        \
+                          (void *)source, n * sizeof(element_type));           \
   }
