@@ -21,6 +21,7 @@ bool rawvec_resize(rawvec *ptr, size_t capacity) {
   size_t old_count = vec->count;
 
   vec = realloc(vec, sizeof(__rawvec_t) + capacity);
+  assert(vec != NULL);
   vec->capacity = capacity;
   if (old_count > capacity)
     vec->count = capacity;
