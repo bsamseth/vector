@@ -80,9 +80,10 @@ bool rawvec_memmove(rawvec *ptr, size_t offset, const void *source, size_t n) {
 
   // If the allocation moved due to the resize, then it cannot overlap with
   // source, so it is safe to do memcpy in place of memmove.
-  if (changed)
+  if (changed) {
     memcpy((*ptr) + offset, source, n);
-  else
+    vec = __rawvec_from_user_ptr(*ptr);
+  } else
     memmove((*ptr) + offset, source, n);
 
   vec->count += n_added;
