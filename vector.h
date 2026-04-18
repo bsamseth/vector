@@ -34,6 +34,9 @@
   static inline bool typealias##_resize(typealias *ptr, size_t capacity) {     \
     return rawvec_resize((rawvec *)ptr, capacity * sizeof(element_type));      \
   }                                                                            \
+  static inline bool typealias##_reserve(typealias *ptr, size_t additional) {  \
+    return rawvec_reserve((rawvec *)ptr, additional * sizeof(element_type));   \
+  }                                                                            \
   static inline void typealias##_set_len(typealias ptr, size_t len) {          \
     rawvec_set_len((rawvec)ptr, len * sizeof(element_type));                   \
   }                                                                            \
