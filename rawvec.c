@@ -1,5 +1,8 @@
 #include "rawvec.h"
+
 #include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -38,17 +41,27 @@ bool rawvec_resize(rawvec *ptr, size_t capacity) {
 bool rawvec_reserve(rawvec *ptr, size_t additional) {
   __rawvec_t *vec = __rawvec_from_user_ptr(*ptr);
 
+  if (additional == 0)
+    return false;
+
   // First check if we already have enough room.
+  if (additional > SIZE_MAX - vec->count) // Avoid overflow.
+    return false;
   size_t required_capacity = vec->count + additional;
   if (required_capacity <= vec->capacity)
     return false;
 
   // Otherwise, determine the next size to grow to.
-  // Growth strategy: Double capacity until enough room.
+  // Growth strategy: Multiply by 1.625 until enough room.
   // If initial capacity is zero, start with the required capacity.
   size_t new_capacity = vec->capacity ? vec->capacity : required_capacity;
   while (new_capacity < required_capacity) {
-    new_capacity *= 2;
+    size_t old_capacity = new_capacity;
+    new_capacity = (old_capacity * 13) / 8;
+    if (new_capacity <= old_capacity) {
+      new_capacity = required_capacity;
+      break;
+    }
   }
 
   return rawvec_resize(ptr, new_capacity);
