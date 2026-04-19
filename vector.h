@@ -22,6 +22,9 @@
   static inline size_t typealias##_remaining(typealias vec) {                  \
     return rawvec_remaining(vec) / sizeof(element_type);                       \
   }                                                                            \
+  static inline typealias typealias##_spare_capacity(typealias vec) {          \
+    return &vec[typealias##_len(vec)];                                         \
+  }                                                                            \
   static inline bool typealias##_is_empty(typealias vec) {                     \
     return rawvec_is_empty(vec);                                               \
   }                                                                            \
@@ -68,6 +71,14 @@
       typealias *ptr, const element_type *source, size_t n) {                  \
     return rawvec_extend((rawvec *)ptr, (void *)source,                        \
                          n * sizeof(element_type));                            \
+  }                                                                            \
+  static inline element_type typealias##_last(typealias ptr) {                 \
+    return *typealias##_last_ptr(ptr);                                         \
+  }                                                                            \
+  static inline element_type *typealias##_last_ptr(typealias ptr) {            \
+    size_t length = typealias##_len(ptr);                                      \
+    assert(length > 0);                                                        \
+    return &ptr[length - 1];                                                   \
   }
 
 // A raw vector of bytes.
