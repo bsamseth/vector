@@ -297,9 +297,9 @@ void test_paddedvec_push_single_struct(void) {
 void test_paddedvec_memmove_multiple_structs(void) {
   paddedvec vec = paddedvec_init(0);
   padded_t data[3] = {
-    {.first = 'x', .second = 1, .last = true},
-    {.first = 'y', .second = 2, .last = false},
-    {.first = 'z', .second = 3, .last = true},
+      {.first = 'x', .second = 1, .last = true},
+      {.first = 'y', .second = 2, .last = false},
+      {.first = 'z', .second = 3, .last = true},
   };
   paddedvec_memmove(&vec, 0, data, 3);
   TEST_ASSERT_EQUAL_INT(3, paddedvec_len(vec));
@@ -507,11 +507,11 @@ void test_paddedvec_bool_fields(void) {
 void test_paddedvec_multiple_structs_then_pop(void) {
   paddedvec vec = paddedvec_init(0);
   padded_t data[5] = {
-    {.first = 'a', .second = 1, .last = true},
-    {.first = 'b', .second = 2, .last = false},
-    {.first = 'c', .second = 3, .last = true},
-    {.first = 'd', .second = 4, .last = false},
-    {.first = 'e', .second = 5, .last = true},
+      {.first = 'a', .second = 1, .last = true},
+      {.first = 'b', .second = 2, .last = false},
+      {.first = 'c', .second = 3, .last = true},
+      {.first = 'd', .second = 4, .last = false},
+      {.first = 'e', .second = 5, .last = true},
   };
   paddedvec_memmove(&vec, 0, data, 5);
   padded_t result = paddedvec_pop(vec);
@@ -679,9 +679,9 @@ void test_intvec_repeated_resize_down_up(void) {
 void test_paddedvec_pop_multiple_preserves_others(void) {
   paddedvec vec = paddedvec_init(0);
   padded_t data[3] = {
-    {.first = 'a', .second = 1, .last = true},
-    {.first = 'b', .second = 2, .last = false},
-    {.first = 'c', .second = 3, .last = true},
+      {.first = 'a', .second = 1, .last = true},
+      {.first = 'b', .second = 2, .last = false},
+      {.first = 'c', .second = 3, .last = true},
   };
   paddedvec_memmove(&vec, 0, data, 3);
   paddedvec_pop(vec);
@@ -694,7 +694,8 @@ void test_paddedvec_pop_multiple_preserves_others(void) {
 void test_paddedvec_large_struct_count(void) {
   paddedvec vec = paddedvec_init(0);
   for (int i = 0; i < 50; i++) {
-    padded_t elem = {.first = (char)i, .second = (size_t)i, .last = (i % 2 == 0)};
+    padded_t elem = {
+        .first = (char)i, .second = (size_t)i, .last = (i % 2 == 0)};
     paddedvec_push(&vec, elem);
   }
   TEST_ASSERT_EQUAL_INT(50, paddedvec_len(vec));
@@ -1678,6 +1679,76 @@ void test_paddedvec_large_struct_pushed(void) {
   paddedvec_free(vec);
 }
 
+void test_intvec_shrink_to_fit(void) {
+  intvec vec = intvec_init(10);
+  intvec_push(&vec, 1);
+  intvec_push(&vec, 2);
+  intvec_push(&vec, 3);
+  TEST_ASSERT_GREATER_THAN_INT(3, intvec_capacity(vec));
+  intvec_shrink_to_fit(&vec);
+  TEST_ASSERT_EQUAL_INT(3, intvec_capacity(vec));
+  TEST_ASSERT_EQUAL_INT(3, intvec_len(vec));
+  intvec_free(vec);
+}
+
+void test_intvec_shrink_to_fit_no_change(void) {
+  intvec vec = intvec_init(3);
+  intvec_push(&vec, 1);
+  intvec_push(&vec, 2);
+  intvec_push(&vec, 3);
+  TEST_ASSERT_TRUE(intvec_shrink_to_fit(&vec) == false);
+  TEST_ASSERT_EQUAL_INT(3, intvec_capacity(vec));
+  intvec_free(vec);
+}
+
+void test_paddedvec_shrink_to_fit(void) {
+  paddedvec vec = paddedvec_init(10);
+  padded_t e = {.first = 'a', .second = 1, .last = true};
+  paddedvec_push(&vec, e);
+  paddedvec_shrink_to_fit(&vec);
+  TEST_ASSERT_EQUAL_INT(1, paddedvec_capacity(vec));
+  TEST_ASSERT_EQUAL_CHAR('a', vec[0].first);
+  paddedvec_free(vec);
+}
+
+void test_intvec_shrink_to_fit_empty(void) {
+  intvec vec = intvec_init(5);
+  intvec_push(&vec, 1);
+  intvec_set_len(vec, 0);
+  intvec_shrink_to_fit(&vec);
+  TEST_ASSERT_EQUAL_INT(0, intvec_capacity(vec));
+  intvec_free(vec);
+}
+
+void test_rawvec_shrink_to_fit(void) {
+  rawvec vec = rawvec_init(10);
+  rawvec_push(&vec, 1);
+  rawvec_push(&vec, 2);
+  rawvec_shrink_to_fit(&vec);
+  TEST_ASSERT_EQUAL_INT(2, rawvec_capacity(vec));
+  TEST_ASSERT_EQUAL_INT(2, rawvec_len(vec));
+  rawvec_free(vec);
+}
+
+void test_rawvec_growth_respects_capacity(void) {
+  rawvec vec = rawvec_init(0);
+  rawvec_push(&vec, 1);
+  TEST_ASSERT_GREATER_THAN_INT(0, rawvec_capacity(vec));
+  rawvec_push(&vec, 2);
+  TEST_ASSERT_GREATER_THAN_INT(1, rawvec_capacity(vec));
+  rawvec_push(&vec, 3);
+  TEST_ASSERT_GREATER_THAN_INT(2, rawvec_capacity(vec));
+  rawvec_free(vec);
+}
+
+void test_rawvec_exact_growth_fit(void) {
+  rawvec vec = rawvec_init(1);
+  rawvec_push(&vec, 1);
+  rawvec_push(&vec, 2);
+  TEST_ASSERT_GREATER_THAN_INT(1, rawvec_capacity(vec));
+  rawvec_free(vec);
+}
+
 int main(void) {
   UNITY_BEGIN();
   RUN_TEST(test_intvec_demo_should_work);
@@ -1830,6 +1901,13 @@ int main(void) {
   RUN_TEST(test_intvec_grow_to_twenty);
   RUN_TEST(test_intvec_capacity_twenty_five);
   RUN_TEST(test_paddedvec_large_struct_pushed);
+  RUN_TEST(test_intvec_shrink_to_fit);
+  RUN_TEST(test_intvec_shrink_to_fit_no_change);
+  RUN_TEST(test_paddedvec_shrink_to_fit);
+  RUN_TEST(test_intvec_shrink_to_fit_empty);
+  RUN_TEST(test_rawvec_shrink_to_fit);
+  RUN_TEST(test_rawvec_growth_respects_capacity);
+  RUN_TEST(test_rawvec_exact_growth_fit);
   return UNITY_END();
 }
 void setUp(void) {}

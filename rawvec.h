@@ -90,3 +90,9 @@ char rawvec_pop(rawvec ptr);
 //
 // Returns true if the vector was moved during resizing.
 bool rawvec_memmove(rawvec *ptr, size_t offset, const void *source, size_t n);
+
+// Shrink the capacity to match the current length.
+//
+// Returns true if the vector was moved during resizing, or false if the
+// capacity already matches the length.
+bool rawvec_shrink_to_fit(rawvec *ptr);

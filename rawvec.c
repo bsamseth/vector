@@ -104,6 +104,13 @@ bool rawvec_memmove(rawvec *ptr, size_t offset, const void *source, size_t n) {
   return changed;
 }
 
+bool rawvec_shrink_to_fit(rawvec *ptr) {
+  __rawvec_t *vec = __rawvec_from_user_ptr(*ptr);
+  if (vec->capacity == vec->count)
+    return false;
+  return rawvec_resize(ptr, vec->count);
+}
+
 #ifdef RAWVEC_TEST_MAIN
 #include <stdio.h>
 int main() {
