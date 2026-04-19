@@ -47,21 +47,6 @@
   static inline void typealias##_set_len(typealias ptr, size_t len) {          \
     rawvec_set_len((rawvec)ptr, len * sizeof(element_type));                   \
   }                                                                            \
-  static inline bool typealias##_push(typealias *ptr, element_type element) {  \
-    char *element_as_bytes = (char *)&element;                                 \
-    int changed = 0;                                                           \
-    for (size_t i = 0; i < sizeof(element_type); ++i)                          \
-      changed += rawvec_push((rawvec *)ptr, element_as_bytes[i]);              \
-    return changed > 0;                                                        \
-  }                                                                            \
-  static inline element_type typealias##_pop(typealias ptr) {                  \
-    size_t length = typealias##_len(ptr);                                      \
-    assert(length > 0);                                                        \
-    element_type value = ptr[length - 1];                                      \
-    for (size_t i = 0; i < sizeof(element_type); ++i)                          \
-      rawvec_pop((rawvec)ptr);                                                 \
-    return value;                                                              \
-  }                                                                            \
   static inline bool typealias##_memmove(                                      \
       typealias *ptr, size_t offset, const element_type *source, size_t n) {   \
     return rawvec_memmove((rawvec *)ptr, offset * sizeof(element_type),        \
@@ -72,13 +57,25 @@
     return rawvec_extend((rawvec *)ptr, (void *)source,                        \
                          n * sizeof(element_type));                            \
   }                                                                            \
-  static inline element_type typealias##_last(typealias ptr) {                 \
-    return *typealias##_last_ptr(ptr);                                         \
+  static inline bool typealias##_push(typealias *ptr, element_type element) {  \
+    if (sizeof(element_type) == 1)                                             \
+      return rawvec_push((rawvec *)ptr, *(char *)&element);                    \
+    return typealias##_extend(ptr, &element, 1);                               \
+  }                                                                            \
+  static inline element_type typealias##_pop(typealias ptr) {                  \
+    size_t length = typealias##_len(ptr);                                      \
+    assert(length > 0);                                                        \
+    element_type value = ptr[length - 1];                                      \
+    typealias##_set_len(ptr, length - 1);                                      \
+    return value;                                                              \
   }                                                                            \
   static inline element_type *typealias##_last_ptr(typealias ptr) {            \
     size_t length = typealias##_len(ptr);                                      \
     assert(length > 0);                                                        \
     return &ptr[length - 1];                                                   \
+  }                                                                            \
+  static inline element_type typealias##_last(typealias ptr) {                 \
+    return *typealias##_last_ptr(ptr);                                         \
   }
 
 // A raw vector of bytes.
