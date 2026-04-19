@@ -1,6 +1,6 @@
 #pragma once
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 // A raw vector of bytes.
 //
@@ -90,6 +90,9 @@ char rawvec_pop(rawvec ptr);
 //
 // Returns true if the vector was moved during resizing.
 bool rawvec_memmove(rawvec *ptr, size_t offset, const void *source, size_t n);
+
+// Shorthand for `rawvec_memmove` with `offset = rawvec_len(ptr)`.
+bool rawvec_extend(rawvec *ptr, const void *source, size_t n);
 
 // Shrink the capacity to match the current length.
 //

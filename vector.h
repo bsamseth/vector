@@ -62,4 +62,9 @@
       typealias *ptr, size_t offset, const element_type *source, size_t n) {   \
     return rawvec_memmove((rawvec *)ptr, offset * sizeof(element_type),        \
                           (void *)source, n * sizeof(element_type));           \
+  }                                                                            \
+  static inline bool typealias##_extend(                                       \
+      typealias *ptr, const element_type *source, size_t n) {                  \
+    return rawvec_extend((rawvec *)ptr, (void *)source,                        \
+                         n * sizeof(element_type));                            \
   }
