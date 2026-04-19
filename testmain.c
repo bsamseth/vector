@@ -4,6 +4,7 @@
 
 #include "unity.h"
 
+#define VECTOR_INCLUDE_IMPLEMENTATION
 #include "vector.h"
 
 typedef struct {

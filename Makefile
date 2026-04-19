@@ -6,14 +6,11 @@ test: testmain
 valgrind: testmain
 	valgrind ./testmain
 
-rawvec: rawvec.c rawvec.h 
-	${CC} ${CFLAGS} -g -DRAWVEC_TEST_MAIN -o $@ $<
-
-testmain: testmain.c rawvec.c vector.h rawvec.h unity.c
+testmain: testmain.c vector.h unity.h unity.c
 	${CC} ${CFLAGS} -g -o $@ $^
 
 clean:
-	rm -fv rawvec testmain
+	rm -fv testmain
 
 .PHONY: clean
 
