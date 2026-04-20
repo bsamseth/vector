@@ -20,7 +20,7 @@ void test_intvec_demo_should_work(void) {
   intvec vec = intvec_init(0);
   TEST_ASSERT_TRUE(intvec_is_empty(vec));
   int data[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  intvec_memmove(&vec, 0, data, 10);
+  intvec_memcpy(&vec, 0, data, 10);
   TEST_ASSERT_FALSE(intvec_is_empty(vec));
 
   TEST_ASSERT_EQUAL_INT(10, intvec_len(vec));
@@ -41,7 +41,7 @@ void test_intvec_demo_should_work(void) {
   TEST_ASSERT_EQUAL_INT(11, intvec_len(vec));
   TEST_ASSERT_EQUAL_INT(102, b);
 
-  intvec_memmove(&vec, 7, data, 10);
+  intvec_memcpy(&vec, 7, data, 10);
   TEST_ASSERT_EQUAL_INT(17, intvec_len(vec));
   intvec_push(&vec, 103);
 
@@ -52,7 +52,7 @@ void test_paddedvec_demo_should_work(void) {
   paddedvec vec = paddedvec_init(0);
   TEST_ASSERT_TRUE(paddedvec_is_empty(vec));
   padded_t data[10] = {{.first = 1, .second = 123, .last = true}};
-  paddedvec_memmove(&vec, 0, data, 10);
+  paddedvec_memcpy(&vec, 0, data, 10);
   TEST_ASSERT_FALSE(paddedvec_is_empty(vec));
 
   TEST_ASSERT_EQUAL_INT(10, paddedvec_len(vec));
@@ -80,7 +80,7 @@ void test_paddedvec_demo_should_work(void) {
   TEST_ASSERT_EQUAL_INT(add.second, b.second);
   TEST_ASSERT_TRUE(b.last == add.last);
 
-  paddedvec_memmove(&vec, 7, data, 10);
+  paddedvec_memcpy(&vec, 7, data, 10);
   TEST_ASSERT_EQUAL_INT(17, paddedvec_len(vec));
   paddedvec_push(&vec, add);
 
@@ -146,32 +146,32 @@ void test_intvec_pop_all_elements(void) {
   intvec_free(vec);
 }
 
-void test_intvec_memmove_to_offset_zero(void) {
+void test_intvec_memcpy_to_offset_zero(void) {
   intvec vec = intvec_init(0);
   int data[] = {10, 20, 30};
-  intvec_memmove(&vec, 0, data, 3);
+  intvec_memcpy(&vec, 0, data, 3);
   TEST_ASSERT_EQUAL_INT(3, intvec_len(vec));
   int expected[] = {10, 20, 30};
   TEST_ASSERT_EQUAL_INT_ARRAY(expected, vec, 3);
   intvec_free(vec);
 }
 
-void test_intvec_memmove_to_end(void) {
+void test_intvec_memcpy_to_end(void) {
   intvec vec = intvec_init(0);
   int initial[] = {1, 2};
-  intvec_memmove(&vec, 0, initial, 2);
+  intvec_memcpy(&vec, 0, initial, 2);
   int more[] = {3, 4};
-  intvec_memmove(&vec, 2, more, 2);
+  intvec_memcpy(&vec, 2, more, 2);
   TEST_ASSERT_EQUAL_INT(4, intvec_len(vec));
   TEST_ASSERT_EQUAL_INT(3, vec[2]);
   TEST_ASSERT_EQUAL_INT(4, vec[3]);
   intvec_free(vec);
 }
 
-void test_intvec_memmove_zero_elements(void) {
+void test_intvec_memcpy_zero_elements(void) {
   intvec vec = intvec_init(0);
   int data[] = {1};
-  intvec_memmove(&vec, 0, data, 0);
+  intvec_memcpy(&vec, 0, data, 0);
   TEST_ASSERT_TRUE(intvec_is_empty(vec));
   intvec_free(vec);
 }
@@ -295,14 +295,14 @@ void test_paddedvec_push_single_struct(void) {
   paddedvec_free(vec);
 }
 
-void test_paddedvec_memmove_multiple_structs(void) {
+void test_paddedvec_memcpy_multiple_structs(void) {
   paddedvec vec = paddedvec_init(0);
   padded_t data[3] = {
       {.first = 'x', .second = 1, .last = true},
       {.first = 'y', .second = 2, .last = false},
       {.first = 'z', .second = 3, .last = true},
   };
-  paddedvec_memmove(&vec, 0, data, 3);
+  paddedvec_memcpy(&vec, 0, data, 3);
   TEST_ASSERT_EQUAL_INT(3, paddedvec_len(vec));
   TEST_ASSERT_EQUAL_INT('x', vec[0].first);
   TEST_ASSERT_EQUAL_INT('y', vec[1].first);
@@ -338,7 +338,7 @@ void test_intvec_boundary_at_capacity(void) {
 void test_intvec_set_len_then_push(void) {
   intvec vec = intvec_init(5);
   int data[] = {10, 20, 30};
-  intvec_memmove(&vec, 0, data, 3);
+  intvec_memcpy(&vec, 0, data, 3);
   intvec_set_len(vec, 0);
   TEST_ASSERT_TRUE(intvec_is_empty(vec));
   intvec_push(&vec, 99);
@@ -370,12 +370,12 @@ void test_paddedvec_resize_struct_vector(void) {
   paddedvec_free(vec);
 }
 
-void test_intvec_append_via_memmove(void) {
+void test_intvec_append_via_memcpy(void) {
   intvec vec = intvec_init(0);
   int initial[] = {1, 2, 3};
-  intvec_memmove(&vec, 0, initial, 3);
+  intvec_memcpy(&vec, 0, initial, 3);
   int append[] = {4, 5};
-  intvec_memmove(&vec, 3, append, 2);
+  intvec_memcpy(&vec, 3, append, 2);
   TEST_ASSERT_EQUAL_INT(5, intvec_len(vec));
   int expected[] = {1, 2, 3, 4, 5};
   TEST_ASSERT_EQUAL_INT_ARRAY(expected, vec, 5);
@@ -464,20 +464,20 @@ void test_intvec_set_len_partial_then_append(void) {
   intvec_set_len(vec, 1);
   TEST_ASSERT_EQUAL_INT(1, intvec_len(vec));
   int data[] = {9, 8};
-  intvec_memmove(&vec, 1, data, 2);
+  intvec_memcpy(&vec, 1, data, 2);
   TEST_ASSERT_EQUAL_INT(3, intvec_len(vec));
   TEST_ASSERT_EQUAL_INT(9, vec[1]);
   TEST_ASSERT_EQUAL_INT(8, vec[2]);
   intvec_free(vec);
 }
 
-void test_intvec_multiple_appends_via_memmove(void) {
+void test_intvec_multiple_appends_via_memcpy(void) {
   intvec vec = intvec_init(0);
-  intvec_memmove(&vec, 0, (int[]){1}, 1);
-  intvec_memmove(&vec, 1, (int[]){2}, 1);
-  intvec_memmove(&vec, 2, (int[]){3}, 1);
-  intvec_memmove(&vec, 3, (int[]){4}, 1);
-  intvec_memmove(&vec, 4, (int[]){5}, 1);
+  intvec_memcpy(&vec, 0, (int[]){1}, 1);
+  intvec_memcpy(&vec, 1, (int[]){2}, 1);
+  intvec_memcpy(&vec, 2, (int[]){3}, 1);
+  intvec_memcpy(&vec, 3, (int[]){4}, 1);
+  intvec_memcpy(&vec, 4, (int[]){5}, 1);
   TEST_ASSERT_EQUAL_INT(5, intvec_len(vec));
   int expected[] = {1, 2, 3, 4, 5};
   TEST_ASSERT_EQUAL_INT_ARRAY(expected, vec, 5);
@@ -514,7 +514,7 @@ void test_paddedvec_multiple_structs_then_pop(void) {
       {.first = 'd', .second = 4, .last = false},
       {.first = 'e', .second = 5, .last = true},
   };
-  paddedvec_memmove(&vec, 0, data, 5);
+  paddedvec_memcpy(&vec, 0, data, 5);
   padded_t result = paddedvec_pop(vec);
   TEST_ASSERT_EQUAL_INT('e', result.first);
   TEST_ASSERT_EQUAL_INT(5, result.second);
@@ -569,21 +569,21 @@ void test_intvec_set_len_preserves_data(void) {
   intvec_free(vec);
 }
 
-void test_intvec_overwrite_at_beginning_via_memmove(void) {
+void test_intvec_overwrite_at_beginning_via_memcpy(void) {
   intvec vec = intvec_init(0);
   intvec_push(&vec, 5);
   intvec_push(&vec, 6);
   int overwrite[] = {1, 2};
-  intvec_memmove(&vec, 0, overwrite, 2);
+  intvec_memcpy(&vec, 0, overwrite, 2);
   TEST_ASSERT_EQUAL_INT(2, intvec_len(vec));
   TEST_ASSERT_EQUAL_INT(1, vec[0]);
   TEST_ASSERT_EQUAL_INT(2, vec[1]);
   intvec_free(vec);
 }
 
-void test_intvec_overwrite_in_middle_via_memmove(void) {
+void test_intvec_overwrite_in_middle_via_memcpy(void) {
   intvec vec = intvec_init(0);
-  intvec_memmove(&vec, 0, (int[]){1, 2, 3}, 3);
+  intvec_memcpy(&vec, 0, (int[]){1, 2, 3}, 3);
   TEST_ASSERT_EQUAL_INT(3, intvec_len(vec));
   TEST_ASSERT_EQUAL_INT(1, vec[0]);
   TEST_ASSERT_EQUAL_INT(2, vec[1]);
@@ -655,7 +655,7 @@ void test_intvec_very_small_capacity(void) {
 void test_intvec_push_does_not_corrupt_other_data(void) {
   intvec vec = intvec_init(0);
   int data[] = {100, 200, 300};
-  intvec_memmove(&vec, 0, data, 3);
+  intvec_memcpy(&vec, 0, data, 3);
   for (int i = 0; i < 5; i++) {
     intvec_push(&vec, i);
   }
@@ -684,7 +684,7 @@ void test_paddedvec_pop_multiple_preserves_others(void) {
       {.first = 'b', .second = 2, .last = false},
       {.first = 'c', .second = 3, .last = true},
   };
-  paddedvec_memmove(&vec, 0, data, 3);
+  paddedvec_memcpy(&vec, 0, data, 3);
   paddedvec_pop(vec);
   TEST_ASSERT_EQUAL_INT(2, paddedvec_len(vec));
   TEST_ASSERT_EQUAL_INT('a', vec[0].first);
@@ -718,11 +718,11 @@ void test_paddedvec_set_len_and_append(void) {
   paddedvec_free(vec);
 }
 
-void test_intvec_many_small_memmoves(void) {
+void test_intvec_many_small_memcpys(void) {
   intvec vec = intvec_init(0);
   for (int i = 0; i < 20; i++) {
     int value = i * 10;
-    intvec_memmove(&vec, i, &value, 1);
+    intvec_memcpy(&vec, i, &value, 1);
   }
   TEST_ASSERT_EQUAL_INT(20, intvec_len(vec));
   TEST_ASSERT_EQUAL_INT(0, vec[0]);
@@ -769,10 +769,10 @@ void test_intvec_zero_length_after_resize(void) {
   intvec_free(vec);
 }
 
-void test_intvec_memmove_single_element(void) {
+void test_intvec_memcpy_single_element(void) {
   intvec vec = intvec_init(0);
   int val = 42;
-  intvec_memmove(&vec, 0, &val, 1);
+  intvec_memcpy(&vec, 0, &val, 1);
   TEST_ASSERT_EQUAL_INT(1, intvec_len(vec));
   TEST_ASSERT_EQUAL_INT(42, vec[0]);
   intvec_free(vec);
@@ -829,10 +829,10 @@ void test_intvec_sequential_growth(void) {
   intvec_free(vec);
 }
 
-void test_intvec_memmove_no_initial_elements(void) {
+void test_intvec_memcpy_no_initial_elements(void) {
   intvec vec = intvec_init(5);
   int data[] = {1};
-  intvec_memmove(&vec, 0, data, 1);
+  intvec_memcpy(&vec, 0, data, 1);
   TEST_ASSERT_EQUAL_INT(1, intvec_len(vec));
   intvec_free(vec);
 }
@@ -853,13 +853,13 @@ void test_intvec_remaining_decreases_with_push(void) {
   intvec_free(vec);
 }
 
-void test_intvec_overwrite_only_using_memmove(void) {
+void test_intvec_overwrite_only_using_memcpy(void) {
   intvec vec = intvec_init(0);
   int data[] = {5, 6, 7};
-  intvec_memmove(&vec, 0, data, 3);
+  intvec_memcpy(&vec, 0, data, 3);
   intvec_set_len(vec, 0);
   int newdata[] = {8, 9};
-  intvec_memmove(&vec, 0, newdata, 2);
+  intvec_memcpy(&vec, 0, newdata, 2);
   TEST_ASSERT_EQUAL_INT(2, intvec_len(vec));
   TEST_ASSERT_EQUAL_INT(8, vec[0]);
   TEST_ASSERT_EQUAL_INT(9, vec[1]);
@@ -876,14 +876,14 @@ void test_intvec_empty_vec_to_large(void) {
   intvec_free(vec);
 }
 
-void test_intvec_memmove_increases_len(void) {
+void test_intvec_memcpy_increases_len(void) {
   intvec vec = intvec_init(0);
   int data[] = {1, 2};
   TEST_ASSERT_EQUAL_INT(0, intvec_len(vec));
-  intvec_memmove(&vec, 0, data, 2);
+  intvec_memcpy(&vec, 0, data, 2);
   TEST_ASSERT_EQUAL_INT(2, intvec_len(vec));
   int data2[] = {3};
-  intvec_memmove(&vec, 2, data2, 1);
+  intvec_memcpy(&vec, 2, data2, 1);
   TEST_ASSERT_EQUAL_INT(3, intvec_len(vec));
   intvec_free(vec);
 }
@@ -962,7 +962,7 @@ void test_intvec_max_capacity_push(void) {
 void test_intvec_struct_equivalent_access(void) {
   intvec vec = intvec_init(0);
   int data[] = {42, 43, 44};
-  intvec_memmove(&vec, 0, data, 3);
+  intvec_memcpy(&vec, 0, data, 3);
   int *ptr = vec;
   TEST_ASSERT_EQUAL_INT(42, ptr[0]);
   TEST_ASSERT_EQUAL_INT(43, ptr[1]);
@@ -1021,7 +1021,7 @@ void test_intvec_five_elements_basic(void) {
 void test_intvec_sequential_zero_to_five(void) {
   intvec vec = intvec_init(0);
   int data[] = {0, 1, 2, 3, 4};
-  intvec_memmove(&vec, 0, data, 5);
+  intvec_memcpy(&vec, 0, data, 5);
   TEST_ASSERT_EQUAL_INT(5, intvec_len(vec));
   int expected[] = {0, 1, 2, 3, 4};
   TEST_ASSERT_EQUAL_INT_ARRAY(expected, vec, 5);
@@ -1090,25 +1090,25 @@ void test_intvec_grow_from_zero_twice(void) {
   intvec_free(vec);
 }
 
-void test_intvec_pop_and_memmove_sequence(void) {
+void test_intvec_pop_and_memcpy_sequence(void) {
   intvec vec = intvec_init(0);
   intvec_push(&vec, 10);
   intvec_push(&vec, 20);
   intvec_push(&vec, 30);
   intvec_pop(vec);
   int data[] = {40, 50};
-  intvec_memmove(&vec, 2, data, 2);
+  intvec_memcpy(&vec, 2, data, 2);
   TEST_ASSERT_EQUAL_INT(4, intvec_len(vec));
   TEST_ASSERT_EQUAL_INT(40, vec[2]);
   TEST_ASSERT_EQUAL_INT(50, vec[3]);
   intvec_free(vec);
 }
 
-void test_intvec_three_memmove_calls(void) {
+void test_intvec_three_memcpy_calls(void) {
   intvec vec = intvec_init(0);
-  intvec_memmove(&vec, 0, (int[]){1}, 1);
-  intvec_memmove(&vec, 1, (int[]){2}, 1);
-  intvec_memmove(&vec, 2, (int[]){3}, 1);
+  intvec_memcpy(&vec, 0, (int[]){1}, 1);
+  intvec_memcpy(&vec, 1, (int[]){2}, 1);
+  intvec_memcpy(&vec, 2, (int[]){3}, 1);
   TEST_ASSERT_EQUAL_INT(3, intvec_len(vec));
   TEST_ASSERT_EQUAL_INT(3, vec[2]);
   intvec_free(vec);
@@ -1231,7 +1231,7 @@ void test_paddedvec_zero_capacity_then_push(void) {
 void test_intvec_set_and_get_multiple(void) {
   intvec vec = intvec_init(0);
   int data[] = {10, 20, 30, 40, 50};
-  intvec_memmove(&vec, 0, data, 5);
+  intvec_memcpy(&vec, 0, data, 5);
   TEST_ASSERT_EQUAL_INT(10, vec[0]);
   TEST_ASSERT_EQUAL_INT(30, vec[2]);
   TEST_ASSERT_EQUAL_INT(50, vec[4]);
@@ -1287,8 +1287,8 @@ void test_intvec_capacity_greater_than_len(void) {
 
 void test_intvec_two_by_two_append(void) {
   intvec vec = intvec_init(0);
-  intvec_memmove(&vec, 0, (int[]){1, 2}, 2);
-  intvec_memmove(&vec, 2, (int[]){3, 4}, 2);
+  intvec_memcpy(&vec, 0, (int[]){1, 2}, 2);
+  intvec_memcpy(&vec, 2, (int[]){3, 4}, 2);
   TEST_ASSERT_EQUAL_INT(4, intvec_len(vec));
   TEST_ASSERT_EQUAL_INT(4, vec[3]);
   intvec_free(vec);
@@ -1298,7 +1298,7 @@ void test_intvec_four_zeros(void) {
   intvec vec = intvec_init(0);
   int zero = 0;
   for (int i = 0; i < 4; i++) {
-    intvec_memmove(&vec, i, &zero, 1);
+    intvec_memcpy(&vec, i, &zero, 1);
   }
   TEST_ASSERT_EQUAL_INT(4, intvec_len(vec));
   TEST_ASSERT_EACH_EQUAL_INT(0, vec, 4);
@@ -1531,20 +1531,20 @@ void test_paddedvec_first_push_grows(void) {
   paddedvec_free(vec);
 }
 
-void test_intvec_memmove_five_elements(void) {
+void test_intvec_memcpy_five_elements(void) {
   intvec vec = intvec_init(0);
   int data[] = {10, 20, 30, 40, 50};
-  intvec_memmove(&vec, 0, data, 5);
+  intvec_memcpy(&vec, 0, data, 5);
   TEST_ASSERT_EQUAL_INT(5, intvec_len(vec));
   TEST_ASSERT_EQUAL_INT(50, vec[4]);
   intvec_free(vec);
 }
 
-void test_intvec_memmove_sequential_five(void) {
+void test_intvec_memcpy_sequential_five(void) {
   intvec vec = intvec_init(0);
   for (int i = 0; i < 5; i++) {
     int value = i * 10;
-    intvec_memmove(&vec, i, &value, 1);
+    intvec_memcpy(&vec, i, &value, 1);
   }
   TEST_ASSERT_EQUAL_INT(5, intvec_len(vec));
   TEST_ASSERT_EQUAL_INT(20, vec[2]);
@@ -1760,9 +1760,9 @@ int main(void) {
   RUN_TEST(test_intvec_push_triggers_resize);
   RUN_TEST(test_intvec_pop_single_element);
   RUN_TEST(test_intvec_pop_all_elements);
-  RUN_TEST(test_intvec_memmove_to_offset_zero);
-  RUN_TEST(test_intvec_memmove_to_end);
-  RUN_TEST(test_intvec_memmove_zero_elements);
+  RUN_TEST(test_intvec_memcpy_to_offset_zero);
+  RUN_TEST(test_intvec_memcpy_to_end);
+  RUN_TEST(test_intvec_memcpy_zero_elements);
   RUN_TEST(test_intvec_set_len_to_zero);
   RUN_TEST(test_intvec_set_len_to_capacity);
   RUN_TEST(test_intvec_resize_up);
@@ -1775,13 +1775,13 @@ int main(void) {
   RUN_TEST(test_intvec_overflow_resize);
   RUN_TEST(test_paddedvec_empty_operations);
   RUN_TEST(test_paddedvec_push_single_struct);
-  RUN_TEST(test_paddedvec_memmove_multiple_structs);
+  RUN_TEST(test_paddedvec_memcpy_multiple_structs);
   RUN_TEST(test_paddedvec_pop_struct);
   RUN_TEST(test_intvec_boundary_at_capacity);
   RUN_TEST(test_intvec_set_len_then_push);
   RUN_TEST(test_intvec_multiple_resizes);
   RUN_TEST(test_paddedvec_resize_struct_vector);
-  RUN_TEST(test_intvec_append_via_memmove);
+  RUN_TEST(test_intvec_append_via_memcpy);
   RUN_TEST(test_intvec_zero_capacity_then_push);
   RUN_TEST(test_intvec_negative_values);
   RUN_TEST(test_intvec_int_min_max);
@@ -1790,7 +1790,7 @@ int main(void) {
   RUN_TEST(test_intvec_interleaved_push_pop);
   RUN_TEST(test_intvec_resize_to_same_size);
   RUN_TEST(test_intvec_set_len_partial_then_append);
-  RUN_TEST(test_intvec_multiple_appends_via_memmove);
+  RUN_TEST(test_intvec_multiple_appends_via_memcpy);
   RUN_TEST(test_paddedvec_all_zero_fields);
   RUN_TEST(test_paddedvec_bool_fields);
   RUN_TEST(test_paddedvec_multiple_structs_then_pop);
@@ -1798,8 +1798,8 @@ int main(void) {
   RUN_TEST(test_intvec_pop_preserves_other_elements);
   RUN_TEST(test_intvec_capacity_growth_pattern);
   RUN_TEST(test_intvec_set_len_preserves_data);
-  RUN_TEST(test_intvec_overwrite_at_beginning_via_memmove);
-  RUN_TEST(test_intvec_overwrite_in_middle_via_memmove);
+  RUN_TEST(test_intvec_overwrite_at_beginning_via_memcpy);
+  RUN_TEST(test_intvec_overwrite_in_middle_via_memcpy);
   RUN_TEST(test_intvec_exact_capacity_push);
   RUN_TEST(test_intvec_single_element_operations);
   RUN_TEST(test_intvec_alternating_push_pop_many);
@@ -1810,22 +1810,22 @@ int main(void) {
   RUN_TEST(test_paddedvec_pop_multiple_preserves_others);
   RUN_TEST(test_paddedvec_large_struct_count);
   RUN_TEST(test_paddedvec_set_len_and_append);
-  RUN_TEST(test_intvec_many_small_memmoves);
+  RUN_TEST(test_intvec_many_small_memcpys);
   RUN_TEST(test_intvec_capacity_one_growth);
   RUN_TEST(test_intvec_exact_resize_then_push);
   RUN_TEST(test_intvec_consecutive_push_short);
   RUN_TEST(test_intvec_zero_length_after_resize);
-  RUN_TEST(test_intvec_memmove_single_element);
+  RUN_TEST(test_intvec_memcpy_single_element);
   RUN_TEST(test_intvec_pop_twice_then_push);
   RUN_TEST(test_paddedvec_pop_preserves_field_values);
   RUN_TEST(test_intvec_set_len_preserves_existing_data);
   RUN_TEST(test_intvec_sequential_growth);
-  RUN_TEST(test_intvec_memmove_no_initial_elements);
+  RUN_TEST(test_intvec_memcpy_no_initial_elements);
   RUN_TEST(test_paddedvec_zero_initial_capacity);
   RUN_TEST(test_intvec_remaining_decreases_with_push);
-  RUN_TEST(test_intvec_overwrite_only_using_memmove);
+  RUN_TEST(test_intvec_overwrite_only_using_memcpy);
   RUN_TEST(test_intvec_empty_vec_to_large);
-  RUN_TEST(test_intvec_memmove_increases_len);
+  RUN_TEST(test_intvec_memcpy_increases_len);
   RUN_TEST(test_intvec_pop_clears_len);
   RUN_TEST(test_intvec_capacity_not_shrink_on_pop);
   RUN_TEST(test_paddedvec_free_on_empty);
@@ -1844,8 +1844,8 @@ int main(void) {
   RUN_TEST(test_intvec_pop_from_full_then_push);
   RUN_TEST(test_paddedvec_ten_structs);
   RUN_TEST(test_intvec_grow_from_zero_twice);
-  RUN_TEST(test_intvec_pop_and_memmove_sequence);
-  RUN_TEST(test_intvec_three_memmove_calls);
+  RUN_TEST(test_intvec_pop_and_memcpy_sequence);
+  RUN_TEST(test_intvec_three_memcpy_calls);
   RUN_TEST(test_intvec_exact_capacity_boundary);
   RUN_TEST(test_intvec_all_ops_combined);
   RUN_TEST(test_intvec_initial_cap_zero_then_one);
@@ -1887,8 +1887,8 @@ int main(void) {
   RUN_TEST(test_intvec_set_len_zero_single_element);
   RUN_TEST(test_intvec_first_push_grows);
   RUN_TEST(test_paddedvec_first_push_grows);
-  RUN_TEST(test_intvec_memmove_five_elements);
-  RUN_TEST(test_intvec_memmove_sequential_five);
+  RUN_TEST(test_intvec_memcpy_five_elements);
+  RUN_TEST(test_intvec_memcpy_sequential_five);
   RUN_TEST(test_intvec_six_elements);
   RUN_TEST(test_intvec_eight_elements);
   RUN_TEST(test_intvec_nine_elements);

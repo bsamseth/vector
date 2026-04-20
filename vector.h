@@ -47,10 +47,10 @@
   static inline void typealias##_set_len(typealias ptr, size_t len) {          \
     rawvec_set_len((rawvec)ptr, len * sizeof(element_type));                   \
   }                                                                            \
-  static inline bool typealias##_memmove(                                      \
+  static inline bool typealias##_memcpy(                                       \
       typealias *ptr, size_t offset, const element_type *source, size_t n) {   \
-    return rawvec_memmove((rawvec *)ptr, offset * sizeof(element_type),        \
-                          (void *)source, n * sizeof(element_type));           \
+    return rawvec_memcpy((rawvec *)ptr, offset * sizeof(element_type),         \
+                         (void *)source, n * sizeof(element_type));            \
   }                                                                            \
   static inline bool typealias##_extend(                                       \
       typealias *ptr, const element_type *source, size_t n) {                  \
@@ -159,15 +159,17 @@ bool rawvec_push(rawvec *ptr, char byte);
 // one. Undefined if the vector is empty.
 char rawvec_pop(rawvec ptr);
 
-// Like `memmove(&ptr[offset], source, n)` while ensuring the vector has enough
+// Like `memcpy(&ptr[offset], source, n)` while ensuring the vector has enough
 // space.
 //
 // Undefined if offset exceeds the current length.
+// Undefined if `[source, source+n)` overlaps with the vector's memory, as the
+// vector might be moved if it needs to grow.
 //
 // Returns true if the vector was moved during resizing.
-bool rawvec_memmove(rawvec *ptr, size_t offset, const void *source, size_t n);
+bool rawvec_memcpy(rawvec *ptr, size_t offset, const void *source, size_t n);
 
-// Shorthand for `rawvec_memmove` with `offset = rawvec_len(ptr)`.
+// Shorthand for `rawvec_memcpy` with `offset = rawvec_len(ptr)`.
 bool rawvec_extend(rawvec *ptr, const void *source, size_t n);
 
 // Shrink the capacity to match the current length.
@@ -264,26 +266,21 @@ char rawvec_pop(rawvec ptr) {
   return ptr[--vec->count];
 }
 
-bool rawvec_memmove(rawvec *ptr, size_t offset, const void *source, size_t n) {
+bool rawvec_memcpy(rawvec *ptr, size_t offset, const void *source, size_t n) {
   __rawvec_t *vec = __rawvec_from_user_ptr(*ptr);
   assert(offset <= vec->count);
   size_t n_added = n - (vec->count - offset);
   bool changed = rawvec_reserve(ptr, n_added);
 
-  // If the allocation moved due to the resize, then it cannot overlap with
-  // source, so it is safe to do memcpy in place of memmove.
-  if (changed) {
-    memcpy((*ptr) + offset, source, n);
+  memcpy((*ptr) + offset, source, n);
+  if (changed)
     vec = __rawvec_from_user_ptr(*ptr);
-  } else
-    memmove((*ptr) + offset, source, n);
-
   vec->count += n_added;
   return changed;
 }
 
 bool rawvec_extend(rawvec *ptr, const void *source, size_t n) {
-  return rawvec_memmove(ptr, rawvec_len(*ptr), source, n);
+  return rawvec_memcpy(ptr, rawvec_len(*ptr), source, n);
 }
 
 bool rawvec_shrink_to_fit(rawvec *ptr) {
