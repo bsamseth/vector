@@ -1750,6 +1750,153 @@ void test_rawvec_exact_growth_fit(void) {
   rawvec_free(vec);
 }
 
+void test_intvec_extend_from_within(void) {
+  intvec vec = intvec_init(0);
+  for (int i = 0; i < 8; i++) {
+    intvec_push(&vec, 7 - i);
+  }
+  int expected[] = {7, 6, 5, 4, 3, 2, 1, 0};
+  TEST_ASSERT_EQUAL_INT_ARRAY(expected, vec, 8);
+
+  intvec_extend_from_within(&vec, 6, expected, 4);
+
+  int expected_after_extend[] = {7, 6, 5, 4, 3, 2, 7, 6, 5, 4, 1, 0};
+  TEST_ASSERT_EQUAL_INT_ARRAY(expected_after_extend, vec, 12);
+
+  TEST_ASSERT_EQUAL_INT(sizeof(expected_after_extend) / sizeof(int),
+                        intvec_len(vec));
+
+  intvec_free(vec);
+}
+
+void test_intvec_extend_from_within_at_beginning(void) {
+  intvec vec = intvec_init(0);
+  int initial[] = {1, 2, 3};
+  intvec_memcpy(&vec, 0, initial, 3);
+
+  int source[] = {100, 101};
+  intvec_extend_from_within(&vec, 0, source, 2);
+
+  int expected[] = {100, 101, 1, 2, 3};
+  TEST_ASSERT_EQUAL_INT(5, intvec_len(vec));
+  TEST_ASSERT_EQUAL_INT_ARRAY(expected, vec, 5);
+
+  intvec_free(vec);
+}
+
+void test_intvec_extend_from_within_at_end(void) {
+  intvec vec = intvec_init(0);
+  int initial[] = {1, 2, 3};
+  intvec_memcpy(&vec, 0, initial, 3);
+
+  int source[] = {100, 101};
+  intvec_extend_from_within(&vec, 3, source, 2);
+
+  int expected[] = {1, 2, 3, 100, 101};
+  TEST_ASSERT_EQUAL_INT(5, intvec_len(vec));
+  TEST_ASSERT_EQUAL_INT_ARRAY(expected, vec, 5);
+
+  intvec_free(vec);
+}
+
+void test_intvec_extend_from_within_n_less_than_remaining(void) {
+  intvec vec = intvec_init(0);
+  int initial[] = {1, 2, 3, 4, 5};
+  intvec_memcpy(&vec, 0, initial, 5);
+
+  int source[] = {100, 101, 102};
+  intvec_extend_from_within(&vec, 2, source, 3);
+
+  int expected[] = {1, 2, 100, 101, 102, 3, 4, 5};
+  TEST_ASSERT_EQUAL_INT(8, intvec_len(vec));
+  TEST_ASSERT_EQUAL_INT_ARRAY(expected, vec, 8);
+
+  intvec_free(vec);
+}
+
+void test_intvec_extend_from_within_n_greater_than_remaining(void) {
+  intvec vec = intvec_init(0);
+  int initial[] = {1, 2, 3, 4, 5};
+  intvec_memcpy(&vec, 0, initial, 5);
+
+  int source[] = {100, 101, 102, 103, 104, 105, 106};
+  intvec_extend_from_within(&vec, 3, source, 7);
+
+  int expected[] = {1, 2, 3, 100, 101, 102, 103, 104, 105, 106, 4, 5};
+  TEST_ASSERT_EQUAL_INT(12, intvec_len(vec));
+  TEST_ASSERT_EQUAL_INT_ARRAY(expected, vec, 12);
+
+  intvec_free(vec);
+}
+
+void test_intvec_extend_from_within_on_empty(void) {
+  intvec vec = intvec_init(0);
+
+  int source[] = {10, 20, 30};
+  intvec_extend_from_within(&vec, 0, source, 3);
+
+  int expected[] = {10, 20, 30};
+  TEST_ASSERT_EQUAL_INT(3, intvec_len(vec));
+  TEST_ASSERT_EQUAL_INT_ARRAY(expected, vec, 3);
+
+  intvec_free(vec);
+}
+
+void test_intvec_extend_from_within_single_element(void) {
+  intvec vec = intvec_init(0);
+  int initial[] = {1};
+  intvec_memcpy(&vec, 0, initial, 1);
+
+  int source[] = {99};
+  intvec_extend_from_within(&vec, 0, source, 1);
+
+  int expected[] = {99, 1};
+  TEST_ASSERT_EQUAL_INT(2, intvec_len(vec));
+  TEST_ASSERT_EQUAL_INT_ARRAY(expected, vec, 2);
+
+  intvec_free(vec);
+}
+
+void test_intvec_extend_from_within_zero_n(void) {
+  intvec vec = intvec_init(0);
+  int initial[] = {1, 2, 3};
+  intvec_memcpy(&vec, 0, initial, 3);
+
+  int source[] = {100};
+  intvec_extend_from_within(&vec, 1, source, 0);
+
+  int expected[] = {1, 2, 3};
+  TEST_ASSERT_EQUAL_INT(3, intvec_len(vec));
+  TEST_ASSERT_EQUAL_INT_ARRAY(expected, vec, 3);
+
+  intvec_free(vec);
+}
+
+void test_paddedvec_extend_from_within(void) {
+  paddedvec vec = paddedvec_init(0);
+  padded_t initial[] = {
+      {.first = 'a', .second = 1, .last = true},
+      {.first = 'b', .second = 2, .last = false},
+      {.first = 'c', .second = 3, .last = true},
+  };
+  paddedvec_memcpy(&vec, 0, initial, 3);
+
+  padded_t source[] = {
+      {.first = 'x', .second = 10, .last = false},
+      {.first = 'y', .second = 20, .last = true},
+  };
+  paddedvec_extend_from_within(&vec, 1, source, 2);
+
+  TEST_ASSERT_EQUAL_INT(5, paddedvec_len(vec));
+  TEST_ASSERT_EQUAL_INT('a', vec[0].first);
+  TEST_ASSERT_EQUAL_INT('x', vec[1].first);
+  TEST_ASSERT_EQUAL_INT('y', vec[2].first);
+  TEST_ASSERT_EQUAL_INT('b', vec[3].first);
+  TEST_ASSERT_EQUAL_INT('c', vec[4].first);
+
+  paddedvec_free(vec);
+}
+
 int main(void) {
   UNITY_BEGIN();
   RUN_TEST(test_intvec_demo_should_work);
@@ -1909,6 +2056,15 @@ int main(void) {
   RUN_TEST(test_rawvec_shrink_to_fit);
   RUN_TEST(test_rawvec_growth_respects_capacity);
   RUN_TEST(test_rawvec_exact_growth_fit);
+  RUN_TEST(test_intvec_extend_from_within);
+  RUN_TEST(test_intvec_extend_from_within_at_beginning);
+  RUN_TEST(test_intvec_extend_from_within_at_end);
+  RUN_TEST(test_intvec_extend_from_within_n_less_than_remaining);
+  RUN_TEST(test_intvec_extend_from_within_n_greater_than_remaining);
+  RUN_TEST(test_intvec_extend_from_within_on_empty);
+  RUN_TEST(test_intvec_extend_from_within_single_element);
+  RUN_TEST(test_intvec_extend_from_within_zero_n);
+  RUN_TEST(test_paddedvec_extend_from_within);
   return UNITY_END();
 }
 void setUp(void) {}

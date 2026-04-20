@@ -76,6 +76,12 @@
   }                                                                            \
   static inline element_type typealias##_last(typealias ptr) {                 \
     return *typealias##_last_ptr(ptr);                                         \
+  }                                                                            \
+  static inline bool typealias##_extend_from_within(                           \
+      typealias *ptr, size_t offset, const element_type *source, size_t n) {   \
+    return rawvec_extend_from_within(                                          \
+        (rawvec *)ptr, offset * sizeof(element_type), (void *)source,          \
+        n * sizeof(element_type));                                             \
   }
 
 // A raw vector of bytes.
@@ -177,6 +183,16 @@ bool rawvec_extend(rawvec *ptr, const void *source, size_t n);
 // Returns true if the vector was moved during resizing, or false if the
 // capacity already matches the length.
 bool rawvec_shrink_to_fit(rawvec *ptr);
+
+// Copy n bytes from `source` into the vector at `offset`, shifting later
+// elements to the right.
+//
+// Undefined if `[source, source+n)` overlaps with the vector's memory, as the
+// vector might be moved if it needs to grow.
+//
+// Returns true if the vector was moved during resizing.
+bool rawvec_extend_from_within(rawvec *ptr, size_t offset, const void *source,
+                               size_t n);
 
 #ifdef VECTOR_INCLUDE_IMPLEMENTATION
 #ifndef VECTOR_IMPLEMENTATION_INCLUDED
@@ -288,6 +304,20 @@ bool rawvec_shrink_to_fit(rawvec *ptr) {
   if (vec->capacity == vec->count)
     return false;
   return rawvec_resize(ptr, vec->count);
+}
+
+bool rawvec_extend_from_within(rawvec *ptr, size_t offset, const void *source,
+                               size_t n) {
+  __rawvec_t *vec = __rawvec_from_user_ptr(*ptr);
+  assert(offset <= vec->count);
+  bool changed = rawvec_reserve(ptr, n);
+  size_t n_elements_from_offset = rawvec_len(*ptr) - offset;
+  memmove(*ptr + offset + n, *ptr + offset, n_elements_from_offset);
+  memcpy(*ptr + offset, source, n);
+  if (changed)
+    vec = __rawvec_from_user_ptr(*ptr);
+  vec->count += n;
+  return changed;
 }
 #endif
 #endif
