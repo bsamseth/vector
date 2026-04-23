@@ -126,9 +126,9 @@ typedef struct {
 // Private macros
 // =============================================================================
 //  Return a `rawvec` from a `__rawvec_t*`.
-#define __rawvec_user_ptr_from_rawvec(vec) ((rawvec)(&((size_t *)(vec))[2]))
+#define __rawvec_user_ptr_from_rawvec(vec) ((rawvec)((__rawvec_t *)(vec) + 1))
 //  Return a `__rawvec_t*` from a `rawvec`.
-#define __rawvec_from_user_ptr(ptr) ((__rawvec_t *)(((size_t *)(ptr)) - 2))
+#define __rawvec_from_user_ptr(ptr) ((__rawvec_t *)(ptr) - 1)
 
 // =============================================================================
 // Public macros
