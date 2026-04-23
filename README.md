@@ -79,3 +79,15 @@ you can pass to anything that expects a pointer.
 I think this is neat, and about as nice as a generic vector implementation can
 be to use in C. This is my vector type. There are many like it, but this one is
 mine. You don't need to like it.
+
+## Alternatives
+
+You probably want [stb_ds.h](http://nothings.org/stb_ds/). It turns out this
+does more or less the exact same thing, except it doesn't force/let you make
+type-spesific functions. It just has the "rawvec" equivalent, and it matters
+what type of pointer you pass in. While that is neat, I don't like it. I would
+like the compiler to tell me that I'm giving `intvec_push` the wrong type, not
+just silently corrupt because it suddenly treats the array as e.g. a `char`
+array. It also doesn't have the functions I would like, such as `*_extend` and
+`*_memcpy`. Finally, this is 216 lines of C, while stb is >1100 lines. Granted
+that includes a whole hash map as well, but I didn't want a hash map.
