@@ -13,19 +13,19 @@
 #define VECTOR_IMPL(element_type, typealias)                                   \
   typedef element_type *typealias;                                             \
                                                                                \
-  static inline size_t typealias##_len(typealias vec) {                        \
+  static inline size_t typealias##_len(const typealias vec) {                  \
     return rawvec_len(vec) / sizeof(element_type);                             \
   }                                                                            \
-  static inline size_t typealias##_capacity(typealias vec) {                   \
+  static inline size_t typealias##_capacity(const typealias vec) {             \
     return rawvec_capacity(vec) / sizeof(element_type);                        \
   }                                                                            \
-  static inline size_t typealias##_remaining(typealias vec) {                  \
+  static inline size_t typealias##_remaining(const typealias vec) {            \
     return rawvec_remaining(vec) / sizeof(element_type);                       \
   }                                                                            \
   static inline typealias typealias##_spare_capacity(typealias vec) {          \
     return &vec[typealias##_len(vec)];                                         \
   }                                                                            \
-  static inline bool typealias##_is_empty(typealias vec) {                     \
+  static inline bool typealias##_is_empty(const typealias vec) {               \
     return rawvec_is_empty(vec);                                               \
   }                                                                            \
   static inline typealias typealias##_init(size_t initial_capacity) {          \
