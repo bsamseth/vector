@@ -13,71 +13,83 @@
 #define VECTOR_IMPL(element_type, typealias)                                   \
   typedef element_type *typealias;                                             \
                                                                                \
-  static inline size_t typealias##_len(const typealias vec) {                  \
+  [[maybe_unused]] static inline size_t typealias##_len(const typealias vec) { \
     return rawvec_len(vec) / sizeof(element_type);                             \
   }                                                                            \
-  static inline size_t typealias##_capacity(const typealias vec) {             \
+  [[maybe_unused]] static inline size_t typealias##_capacity(                  \
+      const typealias vec) {                                                   \
     return rawvec_capacity(vec) / sizeof(element_type);                        \
   }                                                                            \
-  static inline size_t typealias##_remaining(const typealias vec) {            \
+  [[maybe_unused]] static inline size_t typealias##_remaining(                 \
+      const typealias vec) {                                                   \
     return rawvec_remaining(vec) / sizeof(element_type);                       \
   }                                                                            \
-  static inline typealias typealias##_spare_capacity(typealias vec) {          \
+  [[maybe_unused]] static inline typealias typealias##_spare_capacity(         \
+      typealias vec) {                                                         \
     return &vec[typealias##_len(vec)];                                         \
   }                                                                            \
-  static inline bool typealias##_is_empty(const typealias vec) {               \
+  [[maybe_unused]] static inline bool typealias##_is_empty(                    \
+      const typealias vec) {                                                   \
     return rawvec_is_empty(vec);                                               \
   }                                                                            \
-  static inline typealias typealias##_init(size_t initial_capacity) {          \
+  [[maybe_unused]] static inline typealias typealias##_init(                   \
+      size_t initial_capacity) {                                               \
     rawvec vec = rawvec_init(initial_capacity * sizeof(element_type));         \
     return (typealias)vec;                                                     \
   }                                                                            \
-  static inline void typealias##_free(typealias ptr) {                         \
+  [[maybe_unused]] static inline void typealias##_free(typealias ptr) {        \
     rawvec_free((rawvec)ptr);                                                  \
   }                                                                            \
-  static inline bool typealias##_resize(typealias *ptr, size_t capacity) {     \
+  [[maybe_unused]] static inline bool typealias##_resize(typealias *ptr,       \
+                                                         size_t capacity) {    \
     return rawvec_resize((rawvec *)ptr, capacity * sizeof(element_type));      \
   }                                                                            \
-  static inline bool typealias##_reserve(typealias *ptr, size_t additional) {  \
+  [[maybe_unused]] static inline bool typealias##_reserve(typealias *ptr,      \
+                                                          size_t additional) { \
     return rawvec_reserve((rawvec *)ptr, additional * sizeof(element_type));   \
   }                                                                            \
-  static inline bool typealias##_shrink_to_fit(typealias *ptr) {               \
+  [[maybe_unused]] static inline bool typealias##_shrink_to_fit(               \
+      typealias *ptr) {                                                        \
     return rawvec_shrink_to_fit((rawvec *)ptr);                                \
   }                                                                            \
-  static inline void typealias##_set_len(typealias ptr, size_t len) {          \
+  [[maybe_unused]] static inline void typealias##_set_len(typealias ptr,       \
+                                                          size_t len) {        \
     rawvec_set_len((rawvec)ptr, len * sizeof(element_type));                   \
   }                                                                            \
-  static inline bool typealias##_memcpy(                                       \
+  [[maybe_unused]] static inline bool typealias##_memcpy(                      \
       typealias *ptr, size_t offset, const element_type *source, size_t n) {   \
     return rawvec_memcpy((rawvec *)ptr, offset * sizeof(element_type),         \
                          (void *)source, n * sizeof(element_type));            \
   }                                                                            \
-  static inline bool typealias##_extend(                                       \
+  [[maybe_unused]] static inline bool typealias##_extend(                      \
       typealias *ptr, const element_type *source, size_t n) {                  \
     return rawvec_extend((rawvec *)ptr, (void *)source,                        \
                          n * sizeof(element_type));                            \
   }                                                                            \
-  static inline bool typealias##_push(typealias *ptr, element_type element) {  \
+  [[maybe_unused]] static inline bool typealias##_push(typealias *ptr,         \
+                                                       element_type element) { \
     if (sizeof(element_type) == 1)                                             \
       return rawvec_push((rawvec *)ptr, *(char *)&element);                    \
     return typealias##_extend(ptr, &element, 1);                               \
   }                                                                            \
-  static inline element_type typealias##_pop(typealias ptr) {                  \
+  [[maybe_unused]] static inline element_type typealias##_pop(typealias ptr) { \
     size_t length = typealias##_len(ptr);                                      \
     assert(length > 0);                                                        \
     element_type value = ptr[length - 1];                                      \
     typealias##_set_len(ptr, length - 1);                                      \
     return value;                                                              \
   }                                                                            \
-  static inline element_type *typealias##_last_ptr(typealias ptr) {            \
+  [[maybe_unused]] static inline element_type *typealias##_last_ptr(           \
+      typealias ptr) {                                                         \
     size_t length = typealias##_len(ptr);                                      \
     assert(length > 0);                                                        \
     return &ptr[length - 1];                                                   \
   }                                                                            \
-  static inline element_type typealias##_last(typealias ptr) {                 \
+  [[maybe_unused]] static inline element_type typealias##_last(                \
+      typealias ptr) {                                                         \
     return *typealias##_last_ptr(ptr);                                         \
   }                                                                            \
-  static inline bool typealias##_extend_from_within(                           \
+  [[maybe_unused]] static inline bool typealias##_extend_from_within(          \
       typealias *ptr, size_t offset, const element_type *source, size_t n) {   \
     return rawvec_extend_from_within(                                          \
         (rawvec *)ptr, offset * sizeof(element_type), (void *)source,          \

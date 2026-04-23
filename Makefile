@@ -6,8 +6,8 @@ test: testmain
 valgrind: testmain
 	valgrind ./testmain
 
-testmain: testmain.c vector.h unity.h unity.c
-	${CC} ${CFLAGS} -g -o $@ $^
+testmain: testmain.c vector.h unity.h unity_internals.h unity.c
+	${CC} ${CFLAGS} -g testmain.c unity.c -o $@
 
 clean:
 	rm -fv testmain

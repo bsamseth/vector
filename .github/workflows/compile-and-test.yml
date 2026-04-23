@@ -11,12 +11,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Install GCC 14
+      - name: Install GCC 14, Clang 19, and Valgrind
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-14
+          sudo apt-get install -y gcc-14 clang-19 valgrind
 
       - uses: actions/checkout@v4
 
-      - name: make test
-        run: make test
+      - name: GCC make test
+        run: CC=gcc-14 make clean test
+
+      - name: Clang make test
+        run: CC=clang-19 make clean test
+
+      - name: make valgrind
+        run: make valgrind
